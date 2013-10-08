@@ -2,7 +2,7 @@ var links = $('.gamecards_inventorylink');
 var cards = [];
 var appid = 0;
 
-if(links) {
+if(links && $('.unowned').length > 0) {
 	links.append('<button type="button" class="btn_grey_grey btn_small_thin" id="buycards"><span>Buy remaining cards from Market</span></button');
 	$('#buycards').click(function() {
 		$('#buycards').hide();
