@@ -122,7 +122,7 @@ function buyCard() {
 }
 
 function name2id(name) {
-	return htmlspecialchars(name.replace(/ /g, '').replace(/:/g, '').replace(/\./g, ''));
+	return htmlspecialchars(name.replace(/ /g, '').replace(/:/g, '').replace(/\./g, '').replace(/'/g, ''));
 }
 
 function htmlspecialchars(string, quote_style, charset, double_encode) {
