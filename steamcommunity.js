@@ -11,7 +11,7 @@ if(links && $('.unowned').length > 0) {
 		var cards = $('.unowned a');
 		var increment = 1;
 		if(cards.length == 0) {
-			cards = $('.unowned badge_card_set_text');
+			cards = $('.unowned .badge_card_set_text');
 			increment = 2; // skip every other one since it's a series number
 		}
 		
