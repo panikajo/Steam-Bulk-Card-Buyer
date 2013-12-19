@@ -17,7 +17,7 @@ if(links && $('.unowned').length > 0) {
 		
 		var parts = window.location.href.split('/');
 		appid = parts[parts.length - 1];
-		if(appid == '') {
+		if(appid == '' || appid.indexOf('?border=') != -1) {
 			appid = parts[parts.length - 2];
 		}
 		
@@ -25,7 +25,8 @@ if(links && $('.unowned').length > 0) {
 			var card = $(cards[i]);
 			var name = $.trim(card.html().replace('<div style="clear: right"></div>', ''));
 			$('#buycardspanel').append('<span class="cardname"><b>' + name + '</b></span> - <span class="cardprice" id="Price-' + name2id(name).replace(/"/g, '&quot;') + '">Loading...</span>' + '<br />');
-			$.get('/market/listings/753/' + appid + '-' + encodeURIComponent(name), onCardPriceLoaded)
+			console.log('Loading: ' + '/market/listings/753/' + appid + '-' + encodeURIComponent(name + ((window.location.href.indexOf('?border=1') != -1) ? ' (Foil)' : '')));
+			$.get('/market/listings/753/' + appid + '-' + encodeURIComponent(name + ((window.location.href.indexOf('?border=1') != -1) ? ' (Foil)' : '')), onCardPriceLoaded)
 				.fail(function() {
 					$("#Price-" + name2id(name)).html('Error');
 				});
@@ -42,15 +43,15 @@ function onCardPriceLoaded(data, textStatus) {
 	var title = html.find('title').text();
 	var name = title.substring(title.indexOf('-') + 1);
 	
-	if(data.indexOf('There are no listings for this item.') != -1 && name.indexOf('(Trading Card)') == -1) {
-		$.get('/market/listings/753/' + title.substring(title.indexOf('Listings for') + 13, title.indexOf('-')) + '-' + name + ' (Trading Card)', onCardPriceLoaded)
+	if(data.indexOf('There are no listings for this item.') != -1 && name.indexOf('(Trading Card)') == -1 && name.indexOf('(Foil Trading Card)') == -1) {
+		$.get('/market/listings/753/' + title.substring(title.indexOf('Listings for') + 13, title.indexOf('-')) + '-' + name + ' (' + ((window.location.href.indexOf('?border=1') != -1) ? 'Foil ' : '') + 'Trading Card)', onCardPriceLoaded)
 			.fail(function() {
 				$("#Price-" + name2id(name)).html('Error');
 			});
 		return;
 	}
 	
-	name = name.replace(' (Trading Card)', '');
+	name = name.replace(' (Trading Card)', '').replace(' (Foil Trading Card)', '').replace(' (Foil)', '');
 	
 	var item = findElementByClass(html, 'div', 'market_listing_row');
 	var price = findElementByClass($(item), 'span', 'market_listing_price_with_fee');
