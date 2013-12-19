@@ -25,7 +25,10 @@ if(links && $('.unowned').length > 0) {
 			var card = $(cards[i]);
 			var name = $.trim(card.html().replace('<div style="clear: right"></div>', ''));
 			$('#buycardspanel').append('<span class="cardname"><b>' + name + '</b></span> - <span class="cardprice" id="Price-' + name2id(name).replace(/"/g, '&quot;') + '">Loading...</span>' + '<br />');
-			$.get('/market/listings/753/' + appid + '-' + encodeURIComponent(name), onCardPriceLoaded);
+			$.get('/market/listings/753/' + appid + '-' + encodeURIComponent(name), onCardPriceLoaded)
+				.fail(function() {
+					$("#Price-" + name2id(name)).html('Error');
+				});
 		}
 		
 		$('#buycardspanel').show('blind');
@@ -40,7 +43,10 @@ function onCardPriceLoaded(data, textStatus) {
 	var name = title.substring(title.indexOf('-') + 1);
 	
 	if(data.indexOf('There are no listings for this item.') != -1 && name.indexOf('(Trading Card)') == -1) {
-		$.get('/market/listings/753/' + title.substring(title.indexOf('Listings for') + 13, title.indexOf('-')) + '-' + name + ' (Trading Card)', onCardPriceLoaded);
+		$.get('/market/listings/753/' + title.substring(title.indexOf('Listings for') + 13, title.indexOf('-')) + '-' + name + ' (Trading Card)', onCardPriceLoaded)
+			.fail(function() {
+				$("#Price-" + name2id(name)).html('Error');
+			});
 		return;
 	}
 	
@@ -63,7 +69,10 @@ function onCardPriceLoaded(data, textStatus) {
 		var theirPrice = $.trim($(pricenofee).html()).replace('$', '');
 		
 		if(totalPrice == 'Sold!') {
-			$.get('/market/listings/753/' + title.substring(title.indexOf('Listings for') + 13), onCardPriceLoaded);
+			$.get('/market/listings/753/' + title.substring(title.indexOf('Listings for') + 13), onCardPriceLoaded)
+				.fail(function() {
+					$("#Price-" + name2id(name)).html('Error');
+				});
 			return;
 		}
 		
@@ -109,7 +118,7 @@ function buyCard() {
 	$(item.element)[0].innerHTML += ' - Purchasing...';
 	$.post('https://steamcommunity.com/market/buylisting/' + item.listing, {sessionid: item.session, currency: 1, subtotal: Math.round(item.theirs * 100), fee: Math.round((item.total * 100) - (item.theirs * 100)), total: Math.round(item.total * 100)}, function(data, textStatus) {
 		if(textStatus != 'success' || !data.wallet_info.success) {
-			$(item.element).html('Error');
+			$(item.element).html('Failure');
 		} else {
 			$(item.element).html('Purchased');
 		}
@@ -118,11 +127,13 @@ function buyCard() {
 		if(cards.length > 0) {
 			buyCard();
 		}
+	}).fail(function() {
+		$(item.element).html('Failure');
 	});
 }
 
 function name2id(name) {
-	return htmlspecialchars(name.replace(/ /g, '').replace(/:/g, '').replace(/\./g, '').replace(/'/g, ''));
+	return htmlspecialchars(name.replace(/ /g, '').replace(/:/g, '').replace(/;/g, '').replace(/\./g, '').replace(/'/g, '').replace(/#/g, ''));
 }
 
 function htmlspecialchars(string, quote_style, charset, double_encode) {
