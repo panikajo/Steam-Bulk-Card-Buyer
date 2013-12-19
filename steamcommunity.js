@@ -130,6 +130,11 @@ function buyCard() {
 		}
 	}).fail(function() {
 		$(item.element).html('Failure');
+		
+		cards.splice(0, 1);
+		if(cards.length > 0) {
+			buyCard();
+		}
 	});
 }
 
