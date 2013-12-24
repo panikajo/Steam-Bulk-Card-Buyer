@@ -1,39 +1,59 @@
 var links = $('.gamecards_inventorylink');
 var cards = [];
 var appid = 0;
+var failures = [];
+
+var items = $('.unowned a'); // Enhanced Steam turns unowned into links
+if(items.length == 0) {
+	items = $('.unowned .badge_card_set_text');
+	for(var i = 1; i < items.length; i++) {
+		items.splice(i, 1); // Remove every other one since it's a series number
+	}
+}
 
 if(links && $('.unowned').length > 0) {
 	links.append('<button type="button" class="btn_grey_grey btn_small_thin" id="buycards"><span>Buy remaining cards from Market</span></button');
 	$('#buycards').click(function() {
 		$('#buycards').hide();
-		$('.gamecards_inventorylink').append('<div id="buycardspanel" style="display: none; margin-top: 5px"></div>');
-		
-		var cards = $('.unowned a');
-		var increment = 1;
-		if(cards.length == 0) {
-			cards = $('.unowned .badge_card_set_text');
-			increment = 2; // skip every other one since it's a series number
-		}
+		$('.gamecards_inventorylink').append('<div id="buycardspanel" style="visibility: hidden; margin-top: 5px"></div>');
 		
 		var parts = window.location.href.split('/');
 		appid = parts[parts.length - 1];
-		if(appid == '' || appid.indexOf('?border=') != -1) {
+		if(appid == '' || appid.indexOf('?border=') == 0) {
 			appid = parts[parts.length - 2];
 		}
 		
-		for(var i = 0; i < cards.length; i += increment) { // skip every other one since it's a series number
-			var card = $(cards[i]);
-			var name = $.trim(card.html().replace('<div style="clear: right"></div>', ''));
-			$('#buycardspanel').append('<span class="cardname"><b>' + name + '</b></span> - <span class="cardprice" id="Price-' + name2id(name).replace(/"/g, '&quot;') + '">Loading...</span>' + '<br />');
-			console.log('Loading: ' + '/market/listings/753/' + appid + '-' + encodeURIComponent(name + ((window.location.href.indexOf('?border=1') != -1) ? ' (Foil)' : '')));
-			$.get('/market/listings/753/' + appid + '-' + encodeURIComponent(name + ((window.location.href.indexOf('?border=1') != -1) ? ' (Foil)' : '')), onCardPriceLoaded)
-				.fail(function() {
-					$("#Price-" + name2id(name)).html('Error');
-				});
+		if(appid.indexOf('?') != -1) {
+			appid = appid.substring(0, appid.indexOf('?'));
 		}
 		
-		$('#buycardspanel').show('blind');
+		updatePrices();
+		
+		$('#buycardspanel').css('display', 'none').css('visibility', 'visible').show('blind'); // We have to do this visibility/display thing in order for offsetWidth to work
 	});
+}
+
+function updatePrices() {
+	$('#buycardspanel').html('');
+	
+	for(var i = 0; i < items.length; i++) {
+		var name = getCardName(items[i]);
+		$('#buycardspanel').append('<span class="cardname" style="padding-right: 10px; text-align: right; display: inline-block; font-weight: bold">' + name + '</span><span class="cardprice" data-name="' + name.replace(/"/g, '&quot;') + '">Loading...</span>' + '<br />');
+		$.get('/market/listings/753/' + appid + '-' + encodeURIComponent(name + ((window.location.href.indexOf('?border=1') != -1) ? ' (Foil)' : '')), onCardPriceLoaded)
+			.fail(function() {
+				priceElement(name).html('Error');
+			});
+	}
+	
+	var elements = $('.cardname');
+	var largestWidth = 0;
+	for(var i = 1; i < elements.length; i++) {
+		if(elements[i].offsetWidth > elements[largestWidth].offsetWidth) {
+			largestWidth = i;
+		}
+	}
+	
+	$('.cardname').css('width', elements[largestWidth].offsetWidth + 'px');
 }
 
 function onCardPriceLoaded(data, textStatus) {
@@ -46,7 +66,7 @@ function onCardPriceLoaded(data, textStatus) {
 	if(data.indexOf('There are no listings for this item.') != -1 && name.indexOf('(Trading Card)') == -1 && name.indexOf('(Foil Trading Card)') == -1) {
 		$.get('/market/listings/753/' + title.substring(title.indexOf('Listings for') + 13, title.indexOf('-')) + '-' + name + ' (' + ((window.location.href.indexOf('?border=1') != -1) ? 'Foil ' : '') + 'Trading Card)', onCardPriceLoaded)
 			.fail(function() {
-				$("#Price-" + name2id(name)).html('Error');
+				priceElement(name).html('Error');
 			});
 		return;
 	}
@@ -58,7 +78,7 @@ function onCardPriceLoaded(data, textStatus) {
 	var pricenofee = findElementByClass($(item), 'span', 'market_listing_price_without_fee');
 	
 	if(textStatus != 'success' || !item || !price || !pricenofee) {
-		$('#Price-' + name2id(name)).html('Error');
+		priceElement(name).html('Error');
 	} else {
 		var pos = data.indexOf('g_sessionID = "') + 15;
 		var pos2 = data.indexOf('"', pos);
@@ -72,14 +92,14 @@ function onCardPriceLoaded(data, textStatus) {
 		if(totalPrice == 'Sold!') {
 			$.get('/market/listings/753/' + title.substring(title.indexOf('Listings for') + 13), onCardPriceLoaded)
 				.fail(function() {
-					$("#Price-" + name2id(name)).html('Error');
+					priceElement(name).html('Error');
 				});
 			return;
 		}
 		
-		cards.push({session: sessionID, listing: listingID, total: totalPrice, theirs: theirPrice, element: '#Price-' + name2id(name)});
+		cards.push({session: sessionID, listing: listingID, total: totalPrice, theirs: theirPrice, name: name});
 		
-		$('#Price-' + name2id(name)).html('$' + totalPrice);
+		priceElement(name).html('$' + totalPrice);
 	}
 	
 	if(cards.length == $('.cardprice').length) {
@@ -88,8 +108,9 @@ function onCardPriceLoaded(data, textStatus) {
 			total += parseFloat(cards[i].total);
 		}
 		
-		$('#buycardspanel').append('<br /><b>Total: $' + total.toFixed(2) + '</b><br /><br /><button type="button" id="buycardsbutton" class="btn_green_white_innerfade btn_medium_wide" style="padding: 10px 20px 10px 20px">PURCHASE</button>');
+		$('#buycardspanel').append('<br /><span style="font-weight: bold; display: inline-block; width: ' + $('.cardname').css('width') + '; padding-right: 10px; text-align: right">Total</span><b>$<span id="totalprice">' + total.toFixed(2) + '</span></b><br /><br /><button type="button" id="buycardsbutton" class="btn_green_white_innerfade btn_medium_wide" style="padding: 10px 20px 10px 20px; margin-left: ' + ($('.cardname').css('width').replace('px', '') / 2) + 'px">PURCHASE</button>');
 		$('#buycardsbutton').click(function() {
+			failures = [];
 			$('#buycardsbutton').hide();
 			buyCard();
 		});
@@ -111,99 +132,68 @@ function findElementByClass(dom, element, classname) {
 }
 
 function buyCard() {
+	if(cards.length < 1) {
+		if(failures.length > 0) {
+			var retry = [];
+			for(var i = 0; i < items.length; i++) {
+				if(failures.indexOf(getCardName(items[i])) != -1) {
+					retry.push(items[i]);
+				}
+			}
+			
+			items = retry;
+			$('#buycardspanel').append('<button type="button" id="reloadfailuresbutton" class="btn_green_white_innerfade btn_medium_wide" style="padding: 10px 20px 10px 20px; margin-left: ' + ($('.cardname').css('width').replace('px', '') / 2 - 40) + 'px">RELOAD FAILURES</button>');
+			$('#reloadfailuresbutton').click(updatePrices);
+		} else {
+			$('#buycardspanel').append('<button type="button" id="reloadbutton" class="btn_green_white_innerfade btn_medium_wide" style="padding: 10px 20px 10px 20px; margin-left: ' + ($('.cardname').css('width').replace('px', '') / 2 - 25) + 'px">RELOAD PAGE</button>');
+			$('#reloadbutton').click(function() {
+				window.location.reload();
+			});
+		}
+		return;
+	}
+	
 	var item = cards[0];
 	if(!item) {
 		return;
 	}
 	
-	$(item.element)[0].innerHTML += ' - Purchasing...';
+	priceElement(item.name)[0].innerHTML += ' - Purchasing...';
 	$.post('https://steamcommunity.com/market/buylisting/' + item.listing, {sessionid: item.session, currency: 1, subtotal: Math.round(item.theirs * 100), fee: Math.round((item.total * 100) - (item.theirs * 100)), total: Math.round(item.total * 100)}, function(data, textStatus) {
-		if(textStatus != 'success' || !data.wallet_info.success) {
-			$(item.element).html('Failure');
+		if(textStatus != 'success' || !data || !data.wallet_info || !data.wallet_info.success) {
+			priceElement(item.name).html('Failure');
+			failures.push(item.name);
+			decrementTotal(item.total);
 		} else {
-			$(item.element).html('Purchased');
+			priceElement(item.name).html('Purchased');
 		}
 		
 		cards.splice(0, 1);
-		if(cards.length > 0) {
-			buyCard();
-		}
+		buyCard();
 	}).fail(function() {
-		$(item.element).html('Failure');
+		priceElement(item.name).html('Failure');
+		failures.push(item.name);
+		decrementTotal(item.total);
 		
 		cards.splice(0, 1);
-		if(cards.length > 0) {
-			buyCard();
-		}
+		buyCard();
 	});
 }
 
-function name2id(name) {
-	return htmlspecialchars(name.replace(/ /g, '').replace(/:/g, '').replace(/;/g, '').replace(/\./g, '').replace(/'/g, '').replace(/#/g, ''));
+function decrementTotal(total) {
+	$('#totalprice').text(($('#totalprice').text() - total).toFixed(2));
 }
 
-function htmlspecialchars(string, quote_style, charset, double_encode) {
-  // http://kevin.vanzonneveld.net
-  // +   original by: Mirek Slugen
-  // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-  // +   bugfixed by: Nathan
-  // +   bugfixed by: Arno
-  // +    revised by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-  // +    bugfixed by: Brett Zamir (http://brett-zamir.me)
-  // +      input by: Ratheous
-  // +      input by: Mailfaker (http://www.weedem.fr/)
-  // +      reimplemented by: Brett Zamir (http://brett-zamir.me)
-  // +      input by: felix
-  // +    bugfixed by: Brett Zamir (http://brett-zamir.me)
-  // %        note 1: charset argument not supported
-  // *     example 1: htmlspecialchars("<a href='test'>Test</a>", 'ENT_QUOTES');
-  // *     returns 1: '&lt;a href=&#039;test&#039;&gt;Test&lt;/a&gt;'
-  // *     example 2: htmlspecialchars("ab\"c'd", ['ENT_NOQUOTES', 'ENT_QUOTES']);
-  // *     returns 2: 'ab"c&#039;d'
-  // *     example 3: htmlspecialchars("my "&entity;" is still here", null, null, false);
-  // *     returns 3: 'my &quot;&entity;&quot; is still here'
-  var optTemp = 0,
-    i = 0,
-    noquotes = false;
-  if (typeof quote_style === 'undefined' || quote_style === null) {
-    quote_style = 2;
-  }
-  string = string.toString();
-  if (double_encode !== false) { // Put this first to avoid double-encoding
-    string = string.replace(/&/g, '&amp;');
-  }
-  string = string.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+function getCardName(element) {
+	return $.trim($(element).html().replace('<div style="clear: right"></div>', ''));
+}
 
-  var OPTS = {
-    'ENT_NOQUOTES': 0,
-    'ENT_HTML_QUOTE_SINGLE': 1,
-    'ENT_HTML_QUOTE_DOUBLE': 2,
-    'ENT_COMPAT': 2,
-    'ENT_QUOTES': 3,
-    'ENT_IGNORE': 4
-  };
-  if (quote_style === 0) {
-    noquotes = true;
-  }
-  if (typeof quote_style !== 'number') { // Allow for a single string or an array of string flags
-    quote_style = [].concat(quote_style);
-    for (i = 0; i < quote_style.length; i++) {
-      // Resolve string input to bitwise e.g. 'ENT_IGNORE' becomes 4
-      if (OPTS[quote_style[i]] === 0) {
-        noquotes = true;
-      }
-      else if (OPTS[quote_style[i]]) {
-        optTemp = optTemp | OPTS[quote_style[i]];
-      }
-    }
-    quote_style = optTemp;
-  }
-  if (quote_style & OPTS.ENT_HTML_QUOTE_SINGLE) {
-    string = string.replace(/'/g, '&#039;');
-  }
-  if (!noquotes) {
-    string = string.replace(/"/g, '&quot;');
-  }
-
-  return string;
+function priceElement(name) {
+	var elements = $('.cardprice');
+	for(var i = 0; i < elements.length; i++) {
+		if($(elements[i]).data('name') == name) {
+			return $(elements[i]);
+		}
+	}
+	return null;
 }
