@@ -14,6 +14,7 @@ Licensed under GPLv3.
 - Added support for foils
 - Now won't show only some cards if you click the button while Enhanced Steam is loading links
 - Doesn't choke on special characters in card names anymore
+- Doesn't give up after a single failure anymore
 - Better, less confusing layout
 - Total decreases for each failed purchase, showing the amount you actually paid
 - Added reload failures button to retry when a purchase fails
