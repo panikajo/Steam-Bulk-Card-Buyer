@@ -8,6 +8,11 @@ Only works with USD for now.
 
 Licensed under GPLv3.
 
+## FAQ
+
+- **Q: Why does a purchase show "Failure"**
+- **A:** If a purchase fails, someone else probably bought the card before you were able to, or you don't have enough funds in your Steam Wallet.
+
 ## Major Changes in 2.0.0
 
 - Now out of beta!
