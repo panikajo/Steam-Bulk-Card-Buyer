@@ -4,8 +4,6 @@ This user script adds a button to your Steam badge pages allowing you to buy all
 
 Get it from [userscripts.org](http://userscripts.org/scripts/show/186997). If you are running Firefox, you will need to install [Greasemonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/). If you're using Chrome, you will need to install [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=en). **This will not work as a Chrome extension (including dragging the .user.js file into the Extensions page).**
 
-Only works with USD for now.
-
 Licensed under GPLv3.
 
 ## FAQ
