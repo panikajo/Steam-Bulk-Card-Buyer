@@ -19,6 +19,27 @@ var cards = [];
 var appid = 0;
 var failures = [];
 
+// Current currency (numerical identifier used by Steam)
+var currency = 1;
+// Detailed information for each currency ID (using information taken from Steam's Javascript source code)
+var currencyInfo =
+{
+    1: { symbol: "$", separator: "." },
+    2: { symbol: "£", separator: "." },
+    3: { symbol: "€", separator: "," },
+    5: { symbol: "RUB", separator: "," }, // No unicode support for the new symbol yet
+    7: { symbol: "R$", separator: "," }
+}
+// Function to format the string using the currency information
+function formatPrice(price, full)
+{
+    if(full)
+	{
+		return currencyInfo[currency].symbol + price.replace(".", currencyInfo[currency].separator);
+	}
+	return price.replace(".", currencyInfo[currency].separator);
+}
+
 var items = $('.unowned a'); // Enhanced Steam turns unowned into links
 if(items.length == 0) {
 	items = $('.unowned .badge_card_set_text');
@@ -80,7 +101,7 @@ function onCardPriceLoaded(data, textStatus) {
 	var name = title.substring(title.indexOf('-') + 1);
 	
 	if(data.indexOf('There are no listings for this item.') != -1 && name.indexOf('(Trading Card)') == -1 && name.indexOf('(Foil Trading Card)') == -1) {
-		$.get('/market/listings/753/' + title.substring(title.indexOf('Listings for') + 13, title.indexOf('-')) + '-' + name + ' (' + ((window.location.href.indexOf('?border=1') != -1) ? 'Foil ' : '') + 'Trading Card)', onCardPriceLoaded)
+		$.get('/market/listings/753/' + title.substring(title.indexOf('Listings for') + 13, title.indexOf('-')) + '-' + encodeURIComponent(name) + ' (' + ((window.location.href.indexOf('?border=1') != -1) ? 'Foil ' : '') + 'Trading Card)', onCardPriceLoaded)
 			.fail(function() {
 				priceElement(name).html('Error');
 			});
@@ -101,9 +122,18 @@ function onCardPriceLoaded(data, textStatus) {
 		var sessionID = data.substring(pos, pos2);
 		
 		var listingID = $(item).attr('id').split('_')[1];
+        
+		// Find out which currency we are dealing with by looking for the valuta symbol
+        $.each(currencyInfo, function(index) {
+            if($(price).text().indexOf(this.symbol) !== -1)
+            {
+                currency = index;
+            }
+        });
 		
-		var totalPrice = $(price).html().replace(/[^\d.]/g, '');
-		var theirPrice = $(pricenofee).html().replace(/[^\d.]/g, '');
+		// Just translate all commas to dots so we have floating point values
+		var totalPrice = $(price).html().replace(",", ".").replace(/[^0-9.]/g, '');
+		var theirPrice = $(pricenofee).html().replace(",", ".").replace(/[^0-9.]/g, '');
 		
 		if(totalPrice == 'Sold!') {
 			$.get('/market/listings/753/' + title.substring(title.indexOf('Listings for') + 13), onCardPriceLoaded)
@@ -115,7 +145,8 @@ function onCardPriceLoaded(data, textStatus) {
 		
 		cards.push({session: sessionID, listing: listingID, total: totalPrice, theirs: theirPrice, name: name});
 		
-		priceElement(name).html('$' + totalPrice);
+		// Use new currency information
+		priceElement(name).html(formatPrice(totalPrice, true));
 	}
 	
 	if(cards.length == $('.cardprice').length) {
@@ -124,7 +155,8 @@ function onCardPriceLoaded(data, textStatus) {
 			total += parseFloat(cards[i].total);
 		}
 		
-		$('#buycardspanel').append('<br /><span style="font-weight: bold; display: inline-block; width: ' + $('.cardname').css('width') + '; padding-right: 10px; text-align: right">Total</span><b>$<span id="totalprice">' + total.toFixed(2) + '</span></b><br /><br /><button type="button" id="buycardsbutton" class="btn_green_white_innerfade btn_medium_wide" style="padding: 10px 20px 10px 20px; margin-left: ' + ($('.cardname').css('width').replace('px', '') / 2) + 'px">PURCHASE</button>');
+		// Use new currency information
+		$('#buycardspanel').append('<br /><span style="font-weight: bold; display: inline-block; width: ' + $('.cardname').css('width') + '; padding-right: 10px; text-align: right">Total</span><b>' + currencyInfo[currency].symbol + '<span id="totalprice">' + formatPrice(total.toFixed(2)) + '</span></b><br /><br /><button type="button" id="buycardsbutton" class="btn_green_white_innerfade btn_medium_wide" style="padding: 10px 20px 10px 20px; margin-left: ' + ($('.cardname').css('width').replace('px', '') / 2) + 'px">PURCHASE</button>');
 		$('#buycardsbutton').click(function() {
 			failures = [];
 			$('#buycardsbutton').hide();
@@ -175,7 +207,8 @@ function buyCard() {
 	}
 	
 	priceElement(item.name)[0].innerHTML += ' - Purchasing...';
-	$.post('https://steamcommunity.com/market/buylisting/' + item.listing, {sessionid: item.session, currency: 1, subtotal: Math.round(item.theirs * 100), fee: Math.round((item.total * 100) - (item.theirs * 100)), total: Math.round(item.total * 100)}, function(data, textStatus) {
+	// Use new currency indicator
+	$.post('https://steamcommunity.com/market/buylisting/' + item.listing, {sessionid: item.session, currency: currency, subtotal: Math.round(item.theirs * 100), fee: Math.round((item.total * 100) - (item.theirs * 100)), total: Math.round(item.total * 100)}, function(data, textStatus) {
 		if(textStatus != 'success' || !data || !data.wallet_info || !data.wallet_info.success) {
 			priceElement(item.name).html('Failure');
 			failures.push(item.name);
@@ -204,11 +237,13 @@ function buyCard() {
 }
 
 function decrementTotal(total) {
-	$('#totalprice').text(($('#totalprice').text() - total).toFixed(2));
+	// Replace any commas to dots so we get a valid double
+	$('#totalprice').text(formatPrice(($('#totalprice').text().replace(",", ".") - total).toFixed(2)));
 }
 
 function getCardName(element) {
-	return $.trim($(element).html().replace('<div style="clear: right"></div>', ''));
+	// Use text instead of html to prevent encoding mismatches in URLs
+	return $.trim($(element).text().replace('<div style="clear: right"></div>', ''));
 }
 
 function priceElement(name) {
