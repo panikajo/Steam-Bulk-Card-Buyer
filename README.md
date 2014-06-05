@@ -6,7 +6,7 @@ If you are running Firefox, you will need to install [Greasemonkey](https://addo
 
 Licensed under GPLv3.
 
-## [![Install](https://i.imgur.com/hKHfyWz.png)](https://bitbucket.org/Doctor_McKay/steam-trading-card-bulk-buy/raw/tip/badgebuy.user.js)
+## [![Install](https://i.imgur.com/hKHfyWz.png)](https://bitbucket.org/Doctor_McKay/steam-trading-card-bulk-buyer/raw/tip/badgebuy.user.js)
 
 ## FAQ
 
