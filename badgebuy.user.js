@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name			Steam Trading Cards Bulk Buyer
 // @namespace		http://www.doctormckay.com/
-// @version			3.1.1
+// @version			3.1.2
 // @description		Provides a button to purchase remaining cards needed for a badge in bulk
 // @match			http://steamcommunity.com/*/gamecards/*
 // @require			http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js
@@ -117,7 +117,7 @@ function onCardPriceLoaded(data, textStatus) {
 	name = name.replace(' (Trading Card)', '').replace(' (Foil Trading Card)', '').replace(' (Foil)', '');
 	
     if(g_CommodityStatus == -1) {
-        g_CommodityStatus == data.match(/Market_LoadOrderSpread\(\s?\d+\s?\);/).length;
+        g_CommodityStatus = !!data.match(/Market_LoadOrderSpread\(\s?\d+\s?\);/);
 		g_SessionID = data.match(/g_sessionID = ".+";/)[0];
 		g_SessionID = g_SessionID.substring(15, g_SessionID.length - 2);
     }
