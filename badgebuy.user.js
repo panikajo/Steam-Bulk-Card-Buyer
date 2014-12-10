@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name			Steam Trading Cards Bulk Buyer
 // @namespace		http://www.doctormckay.com/
-// @version			3.1.3
+// @version			3.2.0
 // @description		Provides a button to purchase remaining cards needed for a badge in bulk
 // @match			*://steamcommunity.com/*/gamecards/*
-// @require			http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js
+// @require			https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js
 // @copyright		2013 - 2014 Dr. McKay
 // ==/UserScript==
 
@@ -47,6 +47,14 @@ if(items.length == 0) {
 		items.splice(i, 1); // Remove every other one since it's a series number
 	}
 }
+
+// Check if we need to craft a badge
+$(document).ready(function() {
+	if(parseInt(localStorage.autoCraftBadge, 10)) {
+		delete localStorage.autoCraftBadge;
+		$('.badge_craft_button').click();
+	}
+});
 
 if(links && $('.unowned').length > 0) {
 	links.append('<button type="button" class="btn_grey_grey btn_small_thin" id="buycards"><span>Buy remaining cards from Market</span></button');
@@ -194,10 +202,19 @@ function onCardPriceLoaded(data, textStatus) {
 				}
 				
 				$('#buycardspanel').append('<br /><span style="font-weight: bold; display: inline-block; width: ' + $('.cardname').css('width') + '; padding-right: 10px; text-align: right">Total</span><b>' + g_CurrencyInfo[g_Currency].symbol + '<span id="totalprice">' + formatPrice(total.toFixed(2)) + '</span></b><br /><br /><button type="button" id="buycardsbutton" class="btn_green_white_innerfade btn_medium_wide" style="padding: 10px 20px; margin-left: ' + ($('.cardname').css('width').replace('px', '') / 2) + 'px">PLACE ORDERS</button>');
+				$('#buycardspanel').append('<br /><br /><label><input type="checkbox" id="auto-reload-and-craft" /> Automatically reload page and craft badge</label>');
 				$('#buycardsbutton').click(function() {
 					failures = [];
 					$('#buycardsbutton').hide();
 					placeBuyOrder();
+				});
+				
+				if(parseInt(localStorage.autoReloadAndCraftBadge, 10)) {
+					$('#auto-reload-and-craft').prop('checked', true);
+				}
+				
+				$('#auto-reload-and-craft').change(function() {
+					localStorage.autoReloadAndCraftBadge = $('#auto-reload-and-craft').prop('checked') ? 1 : 0;
 				});
 			}
 		});
@@ -316,6 +333,7 @@ function checkOrderStatus(card) {
 			}
 			
 			priceElement(card.name).text(formatPrice((json.purchases[0].price_total / 100).toFixed(2), true) + ' - Purchased');
+			checkAllPurchasesMade();
 			return;
 		}
 		
@@ -363,4 +381,19 @@ function priceElement(name) {
 		}
 	}
 	return null;
+}
+
+function checkAllPurchasesMade() {
+	var elements = $('.cardprice');
+	for(var i = 0; i < elements.length; i++) {
+		if(elements[i].textContent.indexOf('Purchased') == -1) {
+			return;
+		}
+	}
+	
+	// All cards bought
+	if(parseInt(localStorage.autoReloadAndCraftBadge, 10)) {
+		localStorage.autoCraftBadge = 1;
+		window.location.reload();
+	}
 }
