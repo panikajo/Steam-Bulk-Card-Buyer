@@ -16,7 +16,6 @@ $.ajaxSetup({
 });
 
 var links = $('.gamecards_inventorylink');
-var failures = [];
 
 // Current currency (numerical identifier used by Steam)
 var g_Currency = 1;
