@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name			Steam Trading Cards Bulk Buyer
 // @namespace		http://www.doctormckay.com/
-// @version			3.3.0
+// @version			3.3.1
 // @description		Provides a button to purchase remaining cards needed for a badge in bulk
 // @match			*://steamcommunity.com/*/gamecards/*
 // @require			https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js
@@ -69,7 +69,7 @@ function updatePrices() {
 		var row = $('<div class="cardrow"><span class="cardname" style="padding-right: 10px; text-align: right; display: inline-block; font-weight: bold">' + name + '</span><span class="cardprice" data-name="' + name.replace(/"/g, '&quot;') + '">Loading...</span></div>');
 		$('#buycardspanel').append(row);
 		
-		$.get(card.find('.btn_grey_grey.btn_medium')[1].href, function(html) {
+		$.get(card.find('.btn_grey_grey.btn_medium[href*=market]')[0].href, function(html) {
 			if(html.match(/There are no listings for this item\./)) {
 				row.find('.cardprice').text('Error');
 				return;
