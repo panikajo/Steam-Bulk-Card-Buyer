@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name			Steam Trading Cards Bulk Buyer
 // @namespace		http://www.doctormckay.com/
-// @version			3.3.1
+// @version			3.3.2
 // @description		Provides a button to purchase remaining cards needed for a badge in bulk
 // @match			*://steamcommunity.com/*/gamecards/*
 // @require			https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js
@@ -152,7 +152,7 @@ function placeBuyOrder() {
 	card.addClass('buying');
 	
 	$.post('https://steamcommunity.com/market/createbuyorder/', {"sessionid": g_SessionID, "currency": g_Currency, "appid": 753, "market_hash_name": card.data('hashname'), "price_total": card.data('price'), "quantity": 1}, function(json) {
-		placeBuyOrder();
+		setTimeout(placeBuyOrder, 500);
 		
 		if(json.success !== 1) {
 			card.find('.cardprice').text(json.message);
