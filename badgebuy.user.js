@@ -69,7 +69,11 @@ function updatePrices() {
 		var row = $('<div class="cardrow"><span class="cardname" style="padding-right: 10px; text-align: right; display: inline-block; font-weight: bold">' + name + '</span><span class="cardprice" data-name="' + name.replace(/"/g, '&quot;') + '">Loading...</span></div>');
 		$('#buycardspanel').append(row);
 		
-		$.get(card.find('.btn_grey_grey.btn_medium[href*=market]')[0].href, function(html) {
+		var url = card.find('.btn_grey_grey.btn_medium[href*=market]')[0].href;
+		if (document.location.protocol == "https:") {
+			url = url.replace("http://", "https://");
+		}
+		$.get(url, function(html) {
 			if(html.match(/There are no listings for this item\./)) {
 				row.find('.cardprice').text('Error');
 				return;
