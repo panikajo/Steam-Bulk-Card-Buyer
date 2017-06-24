@@ -23,8 +23,8 @@ var g_Currency = 1;
 var g_CurrencyInfo =
 {
     1: { symbol: "$", separator: "." },
-    2: { symbol: "Â£", separator: "." },
-    3: { symbol: "â‚¬", separator: "," },
+    2: { symbol: "£", separator: "." },
+    3: { symbol: "€", separator: "," },
     5: { symbol: "RUB", separator: "," }, // No unicode support for the new symbol yet
     7: { symbol: "R$", separator: "," },
     23: { symbol: "ï¿¥", separator: "." },
@@ -44,6 +44,9 @@ $(document).ready(function() {
 	if(parseInt(localStorage.autoCraftBadge, 10)) {
 		delete localStorage.autoCraftBadge;
 		$('.badge_craft_button').click();
+        setTimeout(function(){
+            window.location.reload();
+        }, 100);
 	}
 });
 
