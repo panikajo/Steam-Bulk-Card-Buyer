@@ -44,7 +44,7 @@ $(document).ready(function() {
 	if(parseInt(localStorage.autoCraftBadge, 10)) {
 		delete localStorage.autoCraftBadge;
 		$('.badge_craft_button').click();
-        setTimeout(function(){
+        setTimeout(function() {
             window.location.reload();
         }, 100);
 	}
