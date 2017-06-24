@@ -23,11 +23,11 @@ var g_Currency = 1;
 var g_CurrencyInfo =
 {
     1: { symbol: "$", separator: "." },
-    2: { symbol: "�", separator: "." },
-    3: { symbol: "�", separator: "," },
+    2: { symbol: "£", separator: "." },
+    3: { symbol: "€", separator: "," },
     5: { symbol: "RUB", separator: "," }, // No unicode support for the new symbol yet
     7: { symbol: "R$", separator: "," },
-    23: { symbol: "￥", separator: "." },
+    23: { symbol: "¥", separator: "." },
 }
 // Function to format the string using the currency information
 function formatPrice(price, full)
