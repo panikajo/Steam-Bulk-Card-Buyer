@@ -6,10 +6,7 @@ If you are running Firefox, you will need to install [Greasemonkey](https://addo
 
 Licensed under GPLv3.
 
-### NOTE: This Fork serves as a temporary download for the updated version of the script
-[Click to install script](https://bitbucket.org/VenatusSimpleX/steam-trading-card-bulk-buyer/raw/367c3ebce4d1e9a58bf29255016a6b847760b065/badgebuy.user.js)
-
-[Click here for the ORIGINAL version of this script (Not yet updated)](https://bitbucket.org/Doctor_McKay/steam-trading-card-bulk-buyer)
+## [![Install](https://i.imgur.com/hKHfyWz.png)](https://bitbucket.org/Doctor_McKay/steam-trading-card-bulk-buyer/raw/tip/badgebuy.user.js)
 
 ## FAQ
 
