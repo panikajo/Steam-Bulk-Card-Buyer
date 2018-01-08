@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Steam Trading Cards Bulk Buyer
 // @namespace       http://www.doctormckay.com/
-// @version         3.4.2
+// @version         3.4.3
 // @description     Provides a button to purchase remaining cards needed for a badge in bulk
 // @match           *://steamcommunity.com/*/gamecards/*
 // @require         https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js
@@ -31,7 +31,7 @@ function formatPrice(price, full)
 {
     if(full)
     {
-        return g_CurrencyInfo.symbol_prefix + price.replace(".", g_CurrencyInfo.separator);
+        return g_CurrencyInfo.symbol_prefix + price.replace(".", g_CurrencyInfo.separator) + g_CurrencyInfo.symbol_suffix;
     }
     return price.replace(".", g_CurrencyInfo.separator);
 }
