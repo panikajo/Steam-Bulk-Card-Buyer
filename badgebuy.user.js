@@ -116,7 +116,7 @@ function updatePrices() {
                     g_CurrencyInfo.symbol_prefix = json.price_prefix;
                 }
                 else {
-                    g_CurrencyInfo.symbol_suffix = json.symbol_suffix;
+                    g_CurrencyInfo.symbol_suffix = json.price_suffix;
                 }
 
                 // Get the separator of the price
