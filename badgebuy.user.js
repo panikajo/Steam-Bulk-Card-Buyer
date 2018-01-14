@@ -120,7 +120,7 @@ function updatePrices() {
                 }
 
                 // Get the separator of the price
-                var regexString = g_CurrencyInfo.symbol_prefix + '\\S+(\\D+)\\d{2}' + g_CurrencyInfo.symbol_suffix;
+                var regexString = g_CurrencyInfo.symbol_prefix.replace("$", "\\\$") + '\\s?\\S+(\\D+)\\d{2}\\s?' + g_CurrencyInfo.symbol_suffix.replace("$", "\\\$");
                 var regex = new RegExp(regexString, "g");
                 var match = regex.exec(json.sell_order_graph[0][2]);
                 g_CurrencyInfo.separator = match[1];
