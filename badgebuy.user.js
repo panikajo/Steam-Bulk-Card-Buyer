@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            Steam Trading Cards Bulk Buyer
 // @namespace       http://www.doctormckay.com/
-// @version         3.4.3
+// @version         3.4.4
 // @description     Provides a button to purchase remaining cards needed for a badge in bulk
 // @match           *://steamcommunity.com/*/gamecards/*
 // @require         https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js
