@@ -1,3 +1,6 @@
+3.4.4
+- Fixed regex failing when Steam puts space between currency and price
+
 3.4.3
 - Fixed typo from `json.symbol_suffix` to `json.price_suffix`
 - Added suffix currency to buy cards list
