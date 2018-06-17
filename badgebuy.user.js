@@ -47,11 +47,15 @@ $(document).ready(function() {
 
     // Check if we need to craft a badge
     if(parseInt(localStorage.autoCraftBadge, 10)) {
-        delete localStorage.autoCraftBadge;
-        $('.badge_craft_button').click();
-        setTimeout(function() {
-            window.location.reload();
-        }, 100);
+        var button = $('.badge_craft_button');
+        if(button.length){
+            button.click();
+            setTimeout(function() {window.location.reload();}, 100);
+            console.log("crafting...");
+        }else{
+            delete localStorage.autoCraftBadge;
+            console.log("suessful craft...");
+        }
     }
 });
 
@@ -108,8 +112,24 @@ function updatePrices() {
                     return;
                 }
 
+                //console.info(json);
+
+                var _lefts = 5 - parseInt(json.sell_order_graph[0][1]);
+                var _level = 0;
+
+                do
+                {
+                    _lefts -= parseInt(json.sell_order_graph[_level++][1]);
+                }
+                while (_lefts > 0);
+                
+                var _price = parseInt(json.lowest_sell_order ) + _level;
+
+                row.data('price', _price);
+
                 row.data('hashname', hashName[1]);
-                row.data('price', json.lowest_sell_order);
+
+                console.log("hashName : ["+ hashName[1] + "]  price: [" + _price + "]");
 
                 // Get the currency symbol
                 if(json.price_prefix) {
@@ -133,7 +153,7 @@ function updatePrices() {
                     var total = 0;
                     var cards = $('.cardrow');
                     for(var i = 0; i < cards.length; i++) {
-                        total += parseInt($(cards[i]).data('price'), 10) / 100;
+                        total += parseInt($(cards[i]).data('price'), 10) * 5 / 100;
                     }
 
                     $('#buycardspanel').append('<br /><span style="font-weight: bold; display: inline-block; width: ' + $('.cardname').css('width') + '; padding-right: 10px; text-align: right">Total</span><b>' + g_CurrencyInfo.symbol_prefix + '<span id="totalprice">' + formatPrice(total.toFixed(2)) + '</span>' + g_CurrencyInfo.symbol_suffix +'</b><br /><br /><button type="button" id="buycardsbutton" class="btn_green_white_innerfade btn_medium_wide" style="padding: 10px 20px; margin-left: ' + ($('.cardname').css('width').replace('px', '') / 2) + 'px">PLACE ORDERS</button>');
@@ -178,7 +198,7 @@ function placeBuyOrder() {
     card.find('.cardprice')[0].innerHTML += ' - Placing buy order...';
     card.addClass('buying');
 
-    $.post('https://steamcommunity.com/market/createbuyorder/', {"sessionid": g_SessionID, "currency": g_Currency, "appid": 753, "market_hash_name": card.data('hashname'), "price_total": card.data('price'), "quantity": 1}, function(json) {
+    $.post('https://steamcommunity.com/market/createbuyorder/', {"sessionid": g_SessionID, "currency": g_Currency, "appid": 753, "market_hash_name": card.data('hashname'), "price_total": card.data('price')*5, "quantity": 5}, function(json) {
         setTimeout(placeBuyOrder, 500);
 
         if(json.success !== 1) {
@@ -186,6 +206,8 @@ function placeBuyOrder() {
             decrementTotal(card.data('price') / 100);
             return;
         }
+        
+        console.info(json);
 
         card.data('orderid', json.buy_orderid);
         card.data('checks', 0);
