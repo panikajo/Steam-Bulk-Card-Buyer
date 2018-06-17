@@ -123,7 +123,7 @@ function updatePrices() {
                 }
                 while (_lefts > 0);
                 
-                var _price = parseInt(json.lowest_sell_order ) + _level;
+                var _price = parseInt(json.lowest_sell_order, 10) + _level;
 
                 row.data('price', _price);
 
@@ -145,7 +145,7 @@ function updatePrices() {
                 var match = regex.exec(json.sell_order_graph[0][2]);
                 g_CurrencyInfo.separator = match[1];
 
-                row.find('.cardprice').text(formatPrice((parseInt(json.lowest_sell_order, 10) / 100).toFixed(2), true));
+                row.find('.cardprice').text(formatPrice(_price / 100).toFixed(2), true));
 
                 row.addClass('ready');
 
