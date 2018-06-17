@@ -1,4 +1,28 @@
-// ==UserScript==
+https://steamcommunity.com/profiles/76561198048432253/gamecards/383930
+https://steamcommunity.com/profiles/76561198048432253/gamecards/289130
+https://steamcommunity.com/profiles/76561198048432253/gamecards/373620
+https://steamcommunity.com/profiles/76561198048432253/gamecards/570890
+https://steamcommunity.com/profiles/76561198048432253/gamecards/601570
+https://steamcommunity.com/profiles/76561198048432253/gamecards/290790
+https://steamcommunity.com/profiles/76561198048432253/gamecards/266510
+https://steamcommunity.com/profiles/76561198048432253/gamecards/508540
+https://steamcommunity.com/profiles/76561198048432253/gamecards/635320
+https://steamcommunity.com/profiles/76561198048432253/gamecards/563250
+https://steamcommunity.com/profiles/76561198048432253/gamecards/434650
+https://steamcommunity.com/profiles/76561198048432253/gamecards/430410
+https://steamcommunity.com/profiles/76561198048432253/gamecards/386590
+https://steamcommunity.com/profiles/76561198048432253/gamecards/20500
+https://steamcommunity.com/profiles/76561198048432253/gamecards/328080
+https://steamcommunity.com/profiles/76561198048432253/gamecards/389810
+https://steamcommunity.com/profiles/76561198048432253/gamecards/510780
+https://steamcommunity.com/profiles/76561198048432253/gamecards/460700
+https://steamcommunity.com/profiles/76561198048432253/gamecards/252470
+https://steamcommunity.com/profiles/76561198048432253/gamecards/250700
+https://steamcommunity.com/profiles/76561198048432253/gamecards/385360
+https://steamcommunity.com/profiles/76561198048432253/gamecards/434420
+https://steamcommunity.com/profiles/76561198048432253/gamecards/299800
+https://steamcommunity.com/profiles/76561198048432253/gamecards/443810
+https://steamcommunity.com/profiles/76561198048432253/gamecards/451660// ==UserScript==
 // @name            Steam Trading Cards Bulk Buyer
 // @namespace       http://www.doctormckay.com/
 // @version         3.4.4
@@ -145,7 +169,7 @@ function updatePrices() {
                 var match = regex.exec(json.sell_order_graph[0][2]);
                 g_CurrencyInfo.separator = match[1];
 
-                row.find('.cardprice').text(formatPrice(_price / 100).toFixed(2), true));
+                row.find('.cardprice').text(formatPrice((_price / 100).toFixed(2), true));
 
                 row.addClass('ready');
 
